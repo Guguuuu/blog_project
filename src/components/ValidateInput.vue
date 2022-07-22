@@ -1,7 +1,7 @@
 <template>
     <div class="validate-input-container pb-3">
-        <input type="text" class="form-control" :class="{ 'is-invalid': inputRef.error }" v-model="inputRef.val"
-            @blur="validateInput">
+        <input class="form-control" :class="{ 'is-invalid': inputRef.error }" :value="inputRef.val"
+            @blur="validateInput" @input="updateValue" v-bind="$attrs">
         <span v-if="inputRef.error" class="invalid-feedback">{{ inputRef.message }}</span>
     </div>
 </template>
@@ -18,14 +18,24 @@ export type RulesProp = RuleProp[]
 export default defineComponent({
     name: 'ValidateInput',
     props: {
-        rules: Array as PropType<RulesProp>
+        rules: Array as PropType<RulesProp>,
+        // 想要在自定义组件支持v-model其实就是两步走(Vue3)，1. 创建一个称之为modelValue的Props
+        modelValue: String
     },
-    setup(props) {
+    inheritAttrs: false, //我不希望组件的根元素继承attribute
+    setup(props, context) {
         const inputRef = reactive({
-            val: '',
+            val: props.modelValue || '',
             error: false,
             message: ''
         })
+        // 自定义组件v-model的改造
+        // 2. 更新值的时候，需要触发一个事件，事件的名称是'update:modelValue',这样就可以实现v-model的功能了
+        const updateValue = (e: Event) => {
+            const targetValue = (e.target as HTMLInputElement).value
+            inputRef.val = targetValue
+            context.emit('update:modelValue', targetValue)
+        }
         const validateInput = () => {
             if (props.rules) {
                 // 循环验证对应的规则,每一个rule都要通过，但凡有一个不通过都会被视为错误
@@ -51,7 +61,8 @@ export default defineComponent({
         }
         return {
             inputRef,
-            validateInput
+            validateInput,
+            updateValue
         }
     }
 })

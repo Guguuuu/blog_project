@@ -4,16 +4,12 @@
     <form action="">
       <div class="mb-3">
         <label class="form-label">邮箱地址</label>
-        <validate-input :rules="emailRules"></validate-input>
+        <validate-input :rules="emailRules" v-model="emailVal" placeholder="请输入邮箱地址" type="text" />
+        <!-- Vue官网说，非Props的Attribute会被添加到这个组件的根元素上 -->
       </div>
       <div class="mb-3">
-        <label for="exampleInputEmail1" class="form-label">邮箱地址</label>
-        <input type="text" class="form-control" id="exampleInputEmail1" v-model="emailRef.val" @blur="validateEmail">
-        <div class="form-text" v-if="emailRef.error">{{ emailRef.message }}</div>
-      </div>
-      <div class="mb-3">
-        <label for="exampleInputPassword1" class="form-label">密码</label>
-        <input type="password" class="form-control" id="exampleInputPassword1">
+        <label class="form-label">密码</label>
+        <validate-input type="password" placeholder="请输入密码" :rules="passwordRules" v-model="passwordVal" />
       </div>
     </form>
   </div>
@@ -21,7 +17,7 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { defineComponent, reactive } from 'vue'
+import { defineComponent, ref } from 'vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import ColumnList from './components/ColumnList.vue'
 import ValidateInput, { RulesProp } from './components/ValidateInput.vue'
@@ -29,7 +25,7 @@ import GlobalHeader, { UserProps } from './components/GlobalHeader.vue'
 import { testData } from './testData'
 const currentUser: UserProps = {
   isLogin: true,
-  name: 'Guguuuu'
+  name: 'viking'
 }
 const emailReg = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 export default defineComponent({
@@ -40,32 +36,23 @@ export default defineComponent({
     ValidateInput
   },
   setup() {
+    const emailVal = ref('')
     const emailRules: RulesProp = [
-      { type: 'required', message: '电子邮件地址不能为空' },
+      { type: 'required', message: '电子邮箱地址不能为空' },
       { type: 'email', message: '请输入正确的电子邮箱格式' }
     ]
-    const emailRef = reactive({
-      val: '',//input的当前值
-      error: false,//是否有error
-      message: ''//error显式的信息
-    })
-    const validateEmail = () => {
-      // blur之后发生的回调函数
-      if (emailRef.val.trim() === '') {
-        //if判断能进来说明输入不符合规则 
-        emailRef.error = true
-        emailRef.message = 'can not be empty'
-      } else if (!emailReg.test(emailRef.val)) {
-        emailRef.error = true
-        emailRef.message = 'should be valid message'
-      }
-    }
+    const passwordVal = ref('')
+    const passwordRules: RulesProp = [
+      { type: 'required', message: '密码不能为空' }
+    ]
+
     return {
       list: testData,
       currentUser,
-      emailRef,
       emailRules,
-      validateEmail
+      emailVal,
+      passwordVal,
+      passwordRules
     }
   }
 })
