@@ -25,10 +25,11 @@ export default defineComponent({
         // 这里面呢应该存放一系列函数，执行以后可以显式错误的信息，并且返回这个input是否通过
         let funcArr: ValidateFunc[] = []
         const submitForm = () => {
-            // 在这个函数体内需要拿到最终的验证，并且触发事件，拿到内部validateinput的结果是一个难点，之后再说，这里先弄一个假的
             // 在submitForm中循环调用Validateinput中的方法并且返回所有结果的最终值,并通过事件发送出去
             // const result = funcArr.every(func => func()) every遇错会提前结束循环
             const result = funcArr.map(func => func()).every(result => result)
+            //map() 方法返回一个新数组，数组中的元素为原始数组元素调用函数处理后的值。
+            // 也就是说funcArr.map(func => func())是一个全是布尔值的数组，再调用every去遍历此数组
             context.emit('form-submit', result)
         }
         const callback = (func?: ValidateFunc) => {
@@ -38,6 +39,8 @@ export default defineComponent({
         }
         //添加到监听器中
         emitter.on('form-item-created', callback)
+        //在ValidateInput中触发'form-item-created'事件，并将validateInput函数做为值传过来。而callback 并不等于 validateInput，而是一个以 validateInput 为参数的函数，也就是
+        // emitter.on('form-item-created', (e)=>{ 这个e就是validateInput })
         onUnmounted(() => {
             emitter.off('form-item-created', callback)
             funcArr = []
