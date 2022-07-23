@@ -20,6 +20,7 @@ import { defineComponent, ref } from 'vue'
 //登录成功，我们想要跳转到首页，这时候需要用到vue-router的另外一个钩子
 //与useRoute不一样，useRoute用于获取路由的信息。useRouter用于定义路由的一系列行为
 //可以调用 用于跳转到另外一个url
+import { useStore } from "vuex";
 import { useRouter } from 'vue-router'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
@@ -32,6 +33,7 @@ export default defineComponent({
     setup() {
         const emailVal = ref('')
         const router = useRouter()
+        const store = useStore()
         const emailRules: RulesProp = [
             { type: 'required', message: '电子邮箱地址不能为空' },
             { type: 'email', message: '请输入正确的电子邮箱格式' }
@@ -45,7 +47,9 @@ export default defineComponent({
             // 如果验证通过了
             if (result) {
                 //push的参数与to属性的参数的值是一样的,底层共用了这个逻辑
-                router.push({ name: 'column', params: { id: 1 } })
+                router.push('/')
+                //触发store对象中的mutation对象中配置的login方法
+                store.commit('login')
             }
         }
         return {

@@ -18,8 +18,9 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { defineComponent } from 'vue'
-import { testData } from '../testData'
+import { defineComponent, computed } from 'vue'
+import { useStore } from 'vuex'
+import { GlobalDataProps } from "../store";
 import ColumnList from '../components/ColumnList.vue'
 export default defineComponent({
     name: 'Home',
@@ -27,8 +28,10 @@ export default defineComponent({
         ColumnList
     },
     setup() {
+        const store = useStore<GlobalDataProps>()
+        const list = computed(() => store.state.columns)
         return {
-            list: testData
+            list
         }
     }
 })
