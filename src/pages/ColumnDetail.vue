@@ -15,7 +15,7 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { GlobalDataProps } from "../store";
@@ -30,8 +30,9 @@ export default defineComponent({
 
         const store = useStore<GlobalDataProps>()
 
-        const column = store.state.columns.find(c => c.id === currentId)
-        const list = store.state.posts.filter(post => post.columnId === currentId)
+        const column = computed(() => store.getters.getColumnById(currentId))
+        const list = computed(() => store.getters.getPostsByCid(currentId))
+
         return {
             column,
             list
