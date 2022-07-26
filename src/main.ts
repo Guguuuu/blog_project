@@ -11,9 +11,6 @@ axios.interceptors.request.use(config => {
     config.params = { ...config.params, icode: '04D4AF3D4966A05E' }
     return config
 })
-axios.get('/columns').then(response => {
-    console.log(response.data);
-})
 const app = createApp(App)
 app.use(router)
 app.use(store)

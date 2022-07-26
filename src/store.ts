@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { createStore } from 'vuex'
+import { createStore, Commit } from 'vuex'
 import axios from 'axios'
 
 interface UserProps {
@@ -33,6 +33,12 @@ export interface GlobalDataProps {
     posts: PostProps[];
     user: UserProps;
 }
+// 2.
+const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
+    // 利用async 和 await 让异步代码看起来和同步代码很像
+    const { data } = await axios.get(url)
+    commit(mutationName, data)
+}
 const store = createStore<GlobalDataProps>({
     state: {
         columns: [],
@@ -57,20 +63,15 @@ const store = createStore<GlobalDataProps>({
         }
     },
     actions: {
-        fetchColumns(context) {
-            axios.get('/columns').then(resp => {
-                context.commit('fetchColumns', resp.data)
-            })
+        // 1.然后可以发现下面的代码形式有点重复，我们可以加以改造，考虑把他们提取出来做一个单独的函数
+        fetchColumns({ commit }) {
+            getAndCommit('/columns', 'fetchColumns', commit)
         },
         fetchColumn({ commit }, cid) {
-            axios.get(`/columns/${cid}`).then(resp => {
-                commit('fetchColumn', resp.data)
-            })
+            getAndCommit(`/columns/${cid}`, 'fetchColumn', commit)
         },
         fetchPost({ commit }, cid) {
-            axios.get(`/columns/${cid}/posts`).then(resp => {
-                commit('fetchPosts', resp.data)
-            })
+            getAndCommit(`/columns/${cid}/posts`, 'fetchPosts', commit)
         }
     },
     getters: {
