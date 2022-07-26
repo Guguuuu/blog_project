@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from './pages/Home.vue'
 import Login from './pages/Login.vue'
 import ColumnDetail from './pages/ColumnDetail.vue'
+import CreatePost from './pages/CreatePost.vue'
+import store from './store'
 // 一般采用history模式，不采用hash模式
 const routerHistory = createWebHistory()
 const router = createRouter({
@@ -19,7 +21,16 @@ const router = createRouter({
         {
             path: '/login',
             name: 'login',
-            component: Login
+            component: Login,
+            meta: { redirectAlreadyLogin: true }
+        },
+        {
+            path: '/create',
+            name: 'create',
+            component: CreatePost,
+            meta: {
+                requiredLogin: true
+            }
         },
         {
             // 设置动态路径参数
@@ -28,6 +39,16 @@ const router = createRouter({
             component: ColumnDetail
         }
     ]
+})
+router.beforeEach((to, from, next) => {
+    // 如果没登录则跳转到登录界面
+    if (to.meta.requiredLogin && !store.state.user.isLogin) {
+        next({ name: 'login' })
+    } else if (to.meta.redirectAlreadyLogin && store.state.user.isLogin) {
+        next('/')
+    } else {
+        next()
+    }
 })
 
 export default router

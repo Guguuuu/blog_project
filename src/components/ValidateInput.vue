@@ -1,7 +1,10 @@
 <template>
     <div class="validate-input-container pb-3">
-        <input class="form-control" :class="{ 'is-invalid': inputRef.error }" :value="inputRef.val"
+        <input v-if="tag !== 'textarea'" class="form-control" :class="{ 'is-invalid': inputRef.error }"
+            :value="inputRef.val" @blur="validateInput" @input="updateValue" v-bind="$attrs">
+        <textarea v-else class="form-control" :class="{ 'is-invalid': inputRef.error }" :value="inputRef.val"
             @blur="validateInput" @input="updateValue" v-bind="$attrs">
+    </textarea>
         <span v-if="inputRef.error" class="invalid-feedback">{{ inputRef.message }}</span>
     </div>
 </template>
@@ -16,12 +19,17 @@ interface RuleProp {
     message: string;
 }
 export type RulesProp = RuleProp[]
+export type TagType = 'input' | 'textarea'
 export default defineComponent({
     name: 'ValidateInput',
     props: {
         rules: Array as PropType<RulesProp>,
         // 想要在自定义组件支持v-model其实就是两步走(Vue3)，1. 创建一个称之为modelValue的Props
-        modelValue: String
+        modelValue: String,
+        tag: {
+            type: String as PropType<TagType>,
+            default: 'input'
+        }
     },
     inheritAttrs: false, //我不希望组件的根元素继承attribute
     setup(props, context) {

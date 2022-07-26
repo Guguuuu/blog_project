@@ -1,37 +1,84 @@
 /* eslint-disable */
-import { createStore } from "vuex";
-import { testData, testPosts, ColumnProps, PostProps } from "./testData";
+import { createStore } from 'vuex'
+import axios from 'axios'
+
 interface UserProps {
     isLogin: boolean;
     name?: string;
     id?: number;
+    columnId?: number;
+}
+interface ImageProps {
+    _id?: string;
+    url?: string;
+    createdAt?: string;
+}
+export interface ColumnProps {
+    _id: string;
+    title: string;
+    avatar?: ImageProps;
+    description: string;
+}
+export interface PostProps {
+    _id: string;
+    title: string;
+    excerpt?: string;
+    content: string;
+    image?: ImageProps;
+    createdAt: string;
+    column: string;
 }
 export interface GlobalDataProps {
     columns: ColumnProps[];
     posts: PostProps[];
-    user: UserProps
+    user: UserProps;
 }
 const store = createStore<GlobalDataProps>({
     state: {
-        columns: testData,
-        posts: testPosts,
-        user: { isLogin: false }
+        columns: [],
+        posts: [],
+        user: { isLogin: true, name: 'viking', columnId: 1 }
     },
     mutations: {
         login(state) {
-            //使用新对象替换老对象，用扩展运算符
-            state.user = { ...state.user, isLogin: true, name: 'Guguuuu' }
+            state.user = { ...state.user, isLogin: true, name: 'viking' }
+        },
+        createPost(state, newPost) {
+            state.posts.push(newPost)
+        },
+        fetchColumns(state, rawData) {
+            state.columns = rawData.data.list
+        },
+        fetchColumn(state, rawData) {
+            state.columns = [rawData.data]
+        },
+        fetchPost(state, rawData) {
+            state.posts = rawData.data.list
+        }
+    },
+    actions: {
+        fetchColumns(context) {
+            axios.get('/columns').then(resp => {
+                context.commit('fetchColumns', resp.data)
+            })
+        },
+        fetchColumn({ commit }, cid) {
+            axios.get(`/columns/${cid}`).then(resp => {
+                commit('fetchColumn', resp.data)
+            })
+        },
+        fetchPost({ commit }, cid) {
+            axios.get(`/columns/${cid}/posts`).then(resp => {
+                commit('fetchPosts', resp.data)
+            })
         }
     },
     getters: {
-        biggerColumnsLen(state) {
-            return state.columns.filter(c => c.id > 2).length
+        getColumnById: (state) => (id: string) => {
+            return state.columns.find(c => c._id === id)
         },
-        getColumnById: (state) => (id: number) => {
-            return state.columns.find(c => c.id === id)
-        },
-        getPostsByCid: (state) => (cid: number) => {
-            return state.posts.filter(post => post.columnId === cid)
+        getPostsByCid: (state) => (cid: string) => {
+            return state.posts.filter(post => post.column === cid)
         }
     }
 })
