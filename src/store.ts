@@ -29,6 +29,7 @@ export interface PostProps {
     column: string;
 }
 export interface GlobalDataProps {
+    loading: boolean;
     columns: ColumnProps[];
     posts: PostProps[];
     user: UserProps;
@@ -36,14 +37,22 @@ export interface GlobalDataProps {
 // 2.
 const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
     // 利用async 和 await 让异步代码看起来和同步代码很像
+    // 发送请求之前和请求之后，触发这个mutation中修改loading状态的方法
+    // commit('setLoading', true)
     const { data } = await axios.get(url)
     commit(mutationName, data)
+    // commit('setLoading', false) 配置了拦截器之后这里就可以不用这样写了
 }
 const store = createStore<GlobalDataProps>({
     state: {
+        /* 3. 刚刚我们用async和await完成了异步请求的改造
+            然后我们发送异步请求的时候，最好给用户一个提示，告诉用户现在数据在读取中
+            请耐心等候，这就是一个经典的loading问题
+            这个loading显然是一个全局的状态，提到全局的状态自然而然的想到了这个store*/
+        loading: false,
         columns: [],
         posts: [],
-        user: { isLogin: true, name: 'viking', columnId: 1 }
+        user: { isLogin: true, name: 'Guguuuu', columnId: 1 }
     },
     mutations: {
         login(state) {
@@ -60,6 +69,9 @@ const store = createStore<GlobalDataProps>({
         },
         fetchPost(state, rawData) {
             state.posts = rawData.data.list
+        },
+        setLoading(state, status) {
+            state.loading = status
         }
     },
     actions: {
