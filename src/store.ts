@@ -36,7 +36,6 @@ export interface GlobalDataProps {
 }
 // 2.
 const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
-    // 利用async 和 await 让异步代码看起来和同步代码很像
     // 发送请求之前和请求之后，触发这个mutation中修改loading状态的方法
     // commit('setLoading', true)
     const { data } = await axios.get(url)
