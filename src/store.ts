@@ -29,6 +29,7 @@ export interface PostProps {
     column: string;
 }
 export interface GlobalDataProps {
+    token: string;
     loading: boolean;
     columns: ColumnProps[];
     posts: PostProps[];
@@ -38,17 +39,23 @@ const getAndCommit = async (url: string, mutationName: string, commit: Commit) =
     const { data } = await axios.get(url)
     commit(mutationName, data)
 }
+const postAndCommit = async (url: string, mutationName: string, commit: Commit, payload: any) => {
+    const { data } = await axios.post(url, payload)
+    commit(mutationName, data)
+    return data
+}
 const store = createStore<GlobalDataProps>({
     state: {
+        token: '',
         loading: false,
         columns: [],
         posts: [],
-        user: { isLogin: true, name: 'Guguuuu', columnId: 1 }
+        user: { isLogin: false, name: 'Guguuuu', columnId: 1 }
     },
     mutations: {
-        login(state) {
-            state.user = { ...state.user, isLogin: true, name: 'viking' }
-        },
+        // login(state) {
+        //     state.user = { ...state.user, isLogin: true, name: 'viking' }
+        // },
         createPost(state, newPost) {
             state.posts.push(newPost)
         },
@@ -63,6 +70,10 @@ const store = createStore<GlobalDataProps>({
         },
         setLoading(state, status) {
             state.loading = status
+        },
+        login(state, rawData) {
+            // 把actions获取返回的token赋值到store上面
+            state.token = rawData.data.token
         }
     },
     actions: {
@@ -74,6 +85,9 @@ const store = createStore<GlobalDataProps>({
         },
         fetchPost({ commit }, cid) {
             getAndCommit(`/columns/${cid}/posts`, 'fetchPosts', commit)
+        },
+        login({ commit }, payload) {
+            return postAndCommit('/user/login', 'login', commit, payload)
         }
     },
     getters: {

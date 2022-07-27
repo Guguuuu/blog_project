@@ -46,10 +46,16 @@ export default defineComponent({
             // console.log('result', result)
             // 如果验证通过了
             if (result) {
-                //push的参数与to属性的参数的值是一样的,底层共用了这个逻辑
-                router.push('/')
-                //触发store对象中的mutation对象中配置的login方法
-                store.commit('login')
+                const payload = {
+                    // 拿到输入的邮箱密码
+                    email: emailVal.value,
+                    password: passwordVal.value
+                }
+                store.dispatch('login', payload).then(data => {
+                    console.log(data);
+                    //push的参数与to属性的参数的值是一样的,底层共用了这个逻辑。返回首页
+                    router.push('/')
+                })
             }
         }
         return {
