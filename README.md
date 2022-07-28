@@ -90,3 +90,23 @@ token的组成
  5. 请求失败 或者token过期  显式错误提示 清空localStorage token (请求错误应该是一个全局的反馈，当token过期或者用户输入错误，或者其他问题，要有一个反馈，不然就会一直显式Loader组件。所以应该在store中)
  
  本次8-5提交，由于没有处理退出登录，所以本地存储会一直保存这个token，所以哪怕重新运行项目，也会保持登录状态
+
+ #### 8-6 创建Message组件
+ 上一次提交做了一个简单的message错误提示。这一次呢我把它抽象成一个message组件
+ Message组件是一个用于全局提示的组件，它不仅可以显示错误的信息，还可以添加成功操作的信息。
+ 甚至显示一个普通的提示。所以应该要有三种类型。
+
+ 和Loader组件一样，一看就知道是一个全局性质的组件，所以它也应该和Loader组件一样，使用Teleport标签添加到根节点去。 而不是附属于某一个特定的组件。
+
+ Message右边还有一个可关闭的按钮，所以这个组件应该需要一个状态存在
+
+ 至于样式嘛，嘿嘿，bootstrap复制！！
+
+ emm 在Loader和Message中
+
+            const node = document.createElement('div')
+            node.id = 'message'
+            document.body.appendChild(node)
+    
+    这样一段代码是很重复的。我们把它抽出来放在useDOMCreate.ts中
+        
