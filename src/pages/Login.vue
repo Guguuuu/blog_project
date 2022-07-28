@@ -51,6 +51,9 @@ export default defineComponent({
                 store.dispatch('loginAndFetch', payload).then(data => {
                     console.log(data);
                     router.push('/')
+                }).catch(e => {
+                    // 由于是点击登录触发的，所以异常要在这里捕获
+                    console.log(e);
                 })
             }
         }

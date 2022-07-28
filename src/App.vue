@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <global-header :user="currentUser"></global-header>
+    <h1>{{ error.message }}</h1>
     <loader v-if="isLoading"></loader>
     <router-view></router-view>
     <footer class="text-center py-4 text-secondary bg-light mt-6">
@@ -19,11 +20,13 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { defineComponent, computed } from 'vue'
-import { useStore } from "vuex";
+import { defineComponent, computed, onMounted } from 'vue'
+import { useStore } from "vuex"
+import axios from 'axios'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import GlobalHeader from './components/GlobalHeader.vue'
 import Loader from './components/Loader.vue'
+import { GlobalDataProps } from './store'
 export default defineComponent({
   name: 'App',
   components: {
@@ -31,12 +34,22 @@ export default defineComponent({
     Loader
   },
   setup() {
-    const store = useStore()
+    const store = useStore<GlobalDataProps>()
     const currentUser = computed(() => store.state.user)
     const isLoading = computed(() => store.state.loading)
+    const token = computed(() => store.state.token)
+    const error = computed(() => store.state.error)
+    onMounted(() => {
+      // 应该是刷新的时候，本来已经登录的user就没了，而token是保存在本地的，能读取到
+      if (!currentUser.value.isLogin && token.value) {
+        axios.defaults.headers.common.Authorization = `Bearer ${token.value}`
+        store.dispatch('fetchCurrentUser')
+      }
+    })
     return {
       currentUser,
-      isLoading
+      isLoading,
+      error
     }
   }
 })
