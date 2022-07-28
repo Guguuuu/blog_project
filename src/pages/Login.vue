@@ -43,17 +43,13 @@ export default defineComponent({
             { type: 'required', message: '密码不能为空' }
         ]
         const onFormSubmit = (result: boolean) => {
-            // console.log('result', result)
-            // 如果验证通过了
             if (result) {
                 const payload = {
-                    // 拿到输入的邮箱密码
                     email: emailVal.value,
                     password: passwordVal.value
                 }
-                store.dispatch('login', payload).then(data => {
+                store.dispatch('loginAndFetch', payload).then(data => {
                     console.log(data);
-                    //push的参数与to属性的参数的值是一样的,底层共用了这个逻辑。返回首页
                     router.push('/')
                 })
             }
