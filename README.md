@@ -109,4 +109,9 @@ token的组成
             document.body.appendChild(node)
     
     这样一段代码是很重复的。我们把它抽出来放在useDOMCreate.ts中
+
+
+#### 8-7 Message组件改进为函数调用形式
+现在我们的组件都是嵌套在组件树中进行展示的，但是Message组件使用这种方式会感觉比较奇怪
+它应该是像一个函数一样进行工作的 比如 createMessage('hello','error')
         

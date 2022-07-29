@@ -24,6 +24,8 @@ import { useStore } from "vuex";
 import { useRouter } from 'vue-router'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
+import createMessage from '../components/createMessage'
+
 export default defineComponent({
     name: 'Login',
     components: {
@@ -49,8 +51,10 @@ export default defineComponent({
                     password: passwordVal.value
                 }
                 store.dispatch('loginAndFetch', payload).then(data => {
-                    console.log(data);
-                    router.push('/')
+                    createMessage('登录成功！', 'success')
+                    setTimeout(() => {
+                        router.push('/')
+                    }, 1000)
                 }).catch(e => {
                     // 由于是点击登录触发的，所以异常要在这里捕获
                     console.log(e);
