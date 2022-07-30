@@ -10,8 +10,8 @@ axios.defaults.baseURL = 'http://apis.imooc.com/api/'
 axios.interceptors.request.use(config => {
     // 其他代码
     store.commit('setLoading', true)
-    // 因为错误提交第一次之后error的状态就为false了，再次提交就不会显示错误信息组件，所以我们每次请求的时候把error的status设置为true
-    store.commit('setError', { status: true, message: '' })
+    // 因为错误提交第一次之后error的状态就为true了，再次提交就不会显示错误信息组件，所以我们每次请求的时候把error的status设置为false
+    store.commit('setError', { status: false, message: '' })
 
     // get请求，添加到URL中
     config.params = { ...config.params, icode: '04D4AF3D4966A05E' }

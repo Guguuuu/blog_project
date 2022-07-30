@@ -40,7 +40,10 @@ export default defineComponent({
     const token = computed(() => store.state.token)
     const error = computed(() => store.state.error)
     onMounted(() => {
-      // 应该是刷新的时候，本来已经登录的user就没了，而token是保存在本地的，能读取到
+      const message = createMessage('测试', 'success')
+      setTimeout(() => {
+        message.destory()
+      }, 2000)
       if (!currentUser.value.isLogin && token.value) {
         axios.defaults.headers.common.Authorization = `Bearer ${token.value}`
         store.dispatch('fetchCurrentUser')

@@ -114,4 +114,89 @@ token的组成
 #### 8-7 Message组件改进为函数调用形式
 现在我们的组件都是嵌套在组件树中进行展示的，但是Message组件使用这种方式会感觉比较奇怪
 它应该是像一个函数一样进行工作的 比如 createMessage('hello','error')
-        
+
+#### 8-8 
+上一次提交完成了函数式调用的改造。看起来已经比较完美了，但真的是这样嘛？
+如果你再去审视对应的代码，发现其实这个通过createApp创建出来的组件实例对象是 App<Element>类型
+createApp返回的是一个App类型，是一个对应的应用实例。在之前，我们只在main.ts见过它
+我们createMessage.ts的目的只是为了创建一个组件，但却创建了一个对应的应用实例
+这其实有点杀鸡用牛刀的感觉
+
+那有没有其他优化方案呢。有。
+
+首先要理解Vnode以及vue的简单工作原理
+VitrulalDOM：一种虚拟的，保存在内存中的数据结构，用来代表UI的表现，和真实DOM节点保持同步。VirtualDOM是由一系列的Vnode组成的。
+
+模拟一个简单的Vnode
+const vnode = {
+    type:'div',
+    props:{
+        id:'hello'
+    },
+    children:[
+        /* more vondes */
+    ]
+}
+
+h 和 createVnode都可以创建vnode，h是hyperscript的缩写，意思就是“JavaScript that produces HTML”
+很多virtualDOM的实现都使用这个函数名称。
+
+两个函数的用法几乎一样，看看h的
+const vnode = h(
+    'div',
+    {id:'foo',class:'bar'}, // 属性  
+    [   // 第三个参数有很多表现形式
+        /* children */
+    ]
+)
+
+#### 8-9
+##### 声明 Render Function：
+当使用 组合API的时候，在setup中直接返回一个对象，代表着给模板使用数据，当要使用render function的时候，可以直接返回一个函数,然后在函数当中就可以返回一系列节点
+比如
+setup(props){
+    const count = ref(1)
+    return () => [h('h1',props.msg),h('div',count.value)] 
+    // 没有对应的属性可以直接写children，多个Vnode则用数组的形式
+}
+
+👉理解： h函数是用来创建Vnode的，而render函数是用来将templete模板转换成一个个的Vnode从而形成一个虚拟DOM树，从而h函数应该被render函数包裹。进而因为h函数不利于书写，所以我们换成jsx的这种方式来在render函数中创建Vnode节点。
+
+我们发现如果一直用h这样的写法，简单的时候还可以，当你有非常多非常多的节点的时候，这时候有可能会非常繁琐
+并且难以读懂，那么有没有更容易让人读懂的格式呢，这时候JSX就出现了
+
+##### 使用JSX：
+JSX是一种类似XML的语法，如果学过React对它应该特别熟悉。他就是h函数的一种语法糖。可以将这种类似HTML的语法转换成h函数的写法。
+
+// 创建vnode
+const vnode = <div>hello</div>
+// 使用变量
+const vnode = <div id={dynamicId}>hello,{userName}</div>
+
+添加JSX支持
+vue add babel
+
+使用这种语法需要改文件后缀名，如果是JS则改成JSX，如果是ts，则改成tsx
+示例：
+export default defineComponent({
+    name:'asdasd'
+    props:{. .. . . .}
+    setup(props){
+        const count = ref(1)
+        return () => {
+            <div>
+                <h1>{props.msg}</h1>
+                <p>{count.value}
+            </div>
+        }
+    }
+})
+
+总结：一般情况下，使用template写法能满足大部分需求，但是有可能有一小部分组件有可能需要使用h render function的写法，因为它呢是一个JS的原生写法，要比template更强大一些，所以选择不同的写法要按照不同的需求来看
+
+
+#### 8-10 使用h函数改造Message组件
+之前说过利用createApp创建对应的组件实例是一个App类型的实例，这个东西太重了，杀鸡用牛刀的感觉
+我们可以改造成8-8 8-9 中提到过的vnode
+
+
