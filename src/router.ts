@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from './pages/Home.vue'
 import Login from './pages/Login.vue'
+import Signup from './pages/Signup.vue'
 import ColumnDetail from './pages/ColumnDetail.vue'
 import CreatePost from './pages/CreatePost.vue'
 import store from './store'
@@ -22,6 +23,12 @@ const router = createRouter({
             path: '/login',
             name: 'login',
             component: Login,
+            meta: { redirectAlreadyLogin: true }
+        },
+        {
+            path: '/signup',
+            name: 'signup',
+            component: Signup,
             meta: { redirectAlreadyLogin: true }
         },
         {
