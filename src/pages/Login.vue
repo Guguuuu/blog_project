@@ -55,7 +55,7 @@ export default defineComponent({
                     password: passwordVal.value
                 }
                 store.dispatch('loginAndFetch', payload).then(data => {
-                    createMessage('登录成功！', 'success')
+                    createMessage('登录成功！正在前往首页！', 'success', 1000)
                     setTimeout(() => {
                         router.push('/')
                     }, 1000)
