@@ -1,0 +1,71 @@
+<!-- eslint-disable vue/multi-word-component-names -->
+<template>
+    <div class="file-upload">
+        <button class="btn btn-primary" @click.prevent="triggerUpload">
+            <span v-if="fileStatus === 'loading'">正在上传...</span>
+            <span v-else-if="fileStatus === 'success'">上传成功</span>
+            <span v-else>点击上传</span>
+        </button>
+        <input type="file" class="file-input d-none" ref="fileInput" @change="handleFileChange">
+        <!-- 把input框隐藏，去实现点击button，触发隐藏的这个input一次upload的过程 -->
+    </div>
+</template>
+
+<script lang="ts">
+/* eslint-disable */
+import { defineComponent, ref } from "vue";
+import axios from 'axios'
+//我们需要根据上传的不同状态展现不同的元素，需要一个字段来指示状态
+type UploadStatus = 'ready' | 'loading' | 'success' | 'error'
+export default defineComponent({
+    //添加一个actions，是post请求发送的地址
+    props: {
+        action: {
+            type: String,
+            required: true
+        }
+    },
+    setup(props) {
+        const fileInput = ref<null | HTMLInputElement>(null)
+        const fileStatus = ref<UploadStatus>('ready')
+        const triggerUpload = () => {
+            if (fileInput.value) {
+                fileInput.value.click()
+            }
+        }
+        const handleFileChange = (e: Event) => {
+            const currentTarget = e.target as HTMLInputElement
+            if (currentTarget.files) {
+                //能进来说明此时已经选择了文件准备上传了
+                fileStatus.value = 'loading'//有了不同的状态就能把界面改一下了
+                const files = Array.from(currentTarget.files)//files不是数组，可以先转换成数组
+                const formData = new FormData()
+                formData.append('file', files[0]) // 拿files数组中的第一项，即第一个文件
+                axios.post(props.action, formData, {
+                    // 第三个参数，是添加一个额外的header，目的是为了传文件
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(resp => {
+                    console.log(resp.data);
+                    fileStatus.value = 'success'
+                }).catch(() => {
+                    fileStatus.value = 'error'
+                }).finally(() => {
+                    if (fileInput.value) {// 这时候拿到的是DOM节点
+                        //将DOM节点的值设置为空
+                        fileInput.value.value = ''
+                    }
+                })
+            }
+        }
+        return {
+            fileInput,
+            fileStatus,
+            triggerUpload,
+            handleFileChange
+        }
+    }
+})
+</script>
+
