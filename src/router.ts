@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { createRouter, createWebHistory } from 'vue-router'
+import axios from 'axios'
 import Home from './pages/Home.vue'
 import Login from './pages/Login.vue'
 import Signup from './pages/Signup.vue'
@@ -48,13 +49,38 @@ const router = createRouter({
     ]
 })
 router.beforeEach((to, from, next) => {
-    // 如果没登录则跳转到登录界面
-    if (to.meta.requiredLogin && !store.state.user.isLogin) {
-        next({ name: 'login' })
-    } else if (to.meta.redirectAlreadyLogin && store.state.user.isLogin) {
-        next('/')
+    const { user, token } = store.state
+    const { requiredLogin, redirectAlreadyLogin } = to.meta
+    if (!user.isLogin) {
+        // 没有登录的
+        if (token) {
+            axios.defaults.headers.common.Authorization = `Bearer ${token}`
+            store.dispatch('fetchCurrentUser').then(() => {
+                if (redirectAlreadyLogin) {
+                    next('/')
+                } else {
+                    next()
+                }
+            }).catch(e => {
+                // 如果这里失败了，说明token过期了，要把过期的token删除掉
+                console.error(e)
+                localStorage.removeItem('token')
+                next('login')
+            })
+        } else {
+            if (requiredLogin) {
+                next('login')
+            } else {
+                next()
+            }
+        }
     } else {
-        next()
+        // 已经登录的
+        if (redirectAlreadyLogin) {
+            next('/')
+        } else {
+            next()
+        }
     }
 })
 
