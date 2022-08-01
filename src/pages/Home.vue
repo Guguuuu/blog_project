@@ -11,7 +11,7 @@
                 </div>
             </div>
         </section>
-        <uploader action="/upload"></uploader>
+        <uploader action="/upload" :beforeUpload="beforeUpload" @file-uploaded="onFileUploaded"></uploader>
         <h4 class="font-weight-bold text-center">发现精彩</h4>
         <column-list :list="list"></column-list>
     </div>
@@ -21,9 +21,10 @@
 /* eslint-disable */
 import { defineComponent, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { GlobalDataProps } from '../store'
+import { GlobalDataProps, ResponseType, ImageProps } from '../store'
 import ColumnList from '../components/ColumnList.vue'
 import Uploader from '../components/Uploader.vue';
+import createMessage from '../components/createMessage';
 
 export default defineComponent({
     name: 'Home',
@@ -37,8 +38,21 @@ export default defineComponent({
             store.dispatch('fetchColumns')
         })
         const list = computed(() => store.state.columns)
+        // 测试传给Uploader组件的beforeUpload是否有用
+        const beforeUpload = (file: File) => {
+            const isJPG = file.type === 'image/jpeg'
+            if (!isJPG) {
+                createMessage('上传图片只能是JPG格式！', 'error', 1000)
+            }
+            return isJPG
+        }
+        const onFileUploaded = (rawData: ResponseType<ImageProps>) => {
+            createMessage(`上传图片ID${rawData.data._id}`, 'success', 2000)
+        }
         return {
-            list
+            list,
+            beforeUpload,
+            onFileUploaded
         }
     }
 })
