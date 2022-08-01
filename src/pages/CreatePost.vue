@@ -1,7 +1,21 @@
 <template>
     <div class="create-post-page">
         <h4>新建文章</h4>
-        <input type="file" name="file" @change.prevent="handleFileChange">
+        <uploader action="/upload"
+            class="d-flex align-items-center justify-content-center bg-light text-secondary w-100 my-4">
+            <h2>点击上传头图</h2>
+            <template #loading>
+                <div class="d-flex">
+                    <div class="spinner-border text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h2>正在上传</h2>
+                </div>
+            </template>
+            <template #uploaded="dataProps">
+                <img :src="dataProps.uploadedData.data.url">
+            </template>
+        </uploader>
         <validate-form @form-submit="onFormSubmit">
             <div class="mb-3">
                 <label class="form-label">文章标题：</label>
@@ -28,12 +42,14 @@ import axios from 'axios'
 import { GlobalDataProps, PostProps } from '../store'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
+import Uploader from '@/components/Uploader.vue'
 
 export default defineComponent({
     name: 'Login',
     components: {
         ValidateInput,
-        ValidateForm
+        ValidateForm,
+        Uploader
     },
     setup() {
         const titleVal = ref('')
@@ -64,35 +80,27 @@ export default defineComponent({
                 }
             }
         }
-        const handleFileChange = (e: Event) => {
-            const target = e.target as HTMLInputElement
-            // files是一个FileList类型，他是一个对象，不是数组，他支持选择多个文件，所以可能有多个
-            const files = target.files
-            if (files) {
-                // 我们只选择一个文件，那就拿他的第一项即可
-                const uploadFile = files[0]
-                // 利用formData模拟表单数据
-                const formData = new FormData()
-                formData.append(uploadFile.name, uploadFile)
-                //下面第三个参数，是添加一个额外的header，为了传文件，我们写成下面这样
-                axios.post('/upload', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }).then((resp: any) => {
-                    console.log(resp)
-                    // 请求成功之后，对象中会看到我们的文件上传到阿里oss的一个地址，复制打开就能看到我们的文件
-                })
-            }
-        }
         return {
             titleRules,
             titleVal,
             contentVal,
             contentRules,
             onFormSubmit,
-            handleFileChange
         }
     }
 })
 </script>
+
+<style>
+.create-post-page .file-upload-container {
+    height: 200px;
+    cursor: pointer;
+}
+
+.create-post-page .file-upload-container img {
+    width: 100%;
+    height: 100%;
+    /* object-fir属性指定可替换元素的内容应该如何适应到其使用的高度和宽度确定的框,这个属性支持响应式 */
+    object-fit: cover;
+}
+</style>

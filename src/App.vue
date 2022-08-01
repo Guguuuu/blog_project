@@ -21,7 +21,6 @@
 /* eslint-disable */
 import { defineComponent, computed, onMounted, watch } from 'vue'
 import { useStore } from "vuex"
-import axios from 'axios'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import GlobalHeader from './components/GlobalHeader.vue'
 import Loader from './components/Loader.vue'

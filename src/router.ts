@@ -64,7 +64,7 @@ router.beforeEach((to, from, next) => {
             }).catch(e => {
                 // 如果这里失败了，说明token过期了，要把过期的token删除掉
                 console.error(e)
-                localStorage.removeItem('token')
+                store.commit('logout')
                 next('login')
             })
         } else {
