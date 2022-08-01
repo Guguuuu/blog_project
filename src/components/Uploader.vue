@@ -1,11 +1,17 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
     <div class="file-upload">
-        <button class="btn btn-primary" @click.prevent="triggerUpload">
-            <span v-if="fileStatus === 'loading'">正在上传...</span>
-            <span v-else-if="fileStatus === 'success'">上传成功</span>
-            <span v-else>点击上传</span>
-        </button>
+        <div class="file-upload-container" @click.prevent="triggerUpload">
+            <slot v-if="fileStatus === 'loading'" name="loading">
+                <button class="btn btn-primary" disabled>正在上传...</button>
+            </slot>
+            <slot v-else-if="fileStatus === 'success'" name="uploaded" :uploadedData="uoloadedData">
+                <button class="btn btn-primary">上传成功</button>
+            </slot>
+            <slot v-else name="default">
+                <button class="btn btn-primary">点击上传</button>
+            </slot>
+        </div>
         <input type="file" class="file-input d-none" ref="fileInput" @change="handleFileChange">
         <!-- 把input框隐藏，去实现点击button，触发隐藏的这个input一次upload的过程 -->
     </div>
@@ -33,6 +39,7 @@ export default defineComponent({
     setup(props, context) {
         const fileInput = ref<null | HTMLInputElement>(null)
         const fileStatus = ref<UploadStatus>('ready')
+        const uoloadedData = ref()
         const triggerUpload = () => {
             if (fileInput.value) {
                 fileInput.value.click()
@@ -62,6 +69,7 @@ export default defineComponent({
                 }).then(resp => {
                     fileStatus.value = 'success'
                     // console.log(resp.data); 根据响应数据的结构，我在store定义了ResponseType类型，以便让'file-uploaded'所对应的回调的参数设置成ResponseType类型获得更好的TS支持
+                    uoloadedData.value = resp.data
                     context.emit('file-uploaded', resp.data)
                 }).catch((error) => {
                     fileStatus.value = 'error'
@@ -77,6 +85,7 @@ export default defineComponent({
         return {
             fileInput,
             fileStatus,
+            uoloadedData,
             triggerUpload,
             handleFileChange
         }
