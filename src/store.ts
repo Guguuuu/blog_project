@@ -18,6 +18,7 @@ export interface ImageProps {
     _id?: string;
     url?: string;
     createdAt?: string;
+    fitUrl?: string;
 }
 export interface ColumnProps {
     _id: string;
@@ -26,13 +27,14 @@ export interface ColumnProps {
     description: string;
 }
 export interface PostProps {
-    _id: string;
+    _id?: string;
     title: string;
     excerpt?: string;
     content: string;
-    image?: ImageProps;
-    createdAt: string;
+    image?: ImageProps | string;
+    createdAt?: string;
     column: string;
+    author?: string;
 }
 export interface GlobalErrorProps {
     status: boolean;
@@ -78,7 +80,7 @@ const store = createStore<GlobalDataProps>({
         fetchColumn(state, rawData) {
             state.columns = [rawData.data]
         },
-        fetchPost(state, rawData) {
+        fetchPosts(state, rawData) {
             state.posts = rawData.data.list
         },
         setLoading(state, status) {
@@ -109,7 +111,7 @@ const store = createStore<GlobalDataProps>({
         fetchColumn({ commit }, cid) {
             return getAndCommit(`/columns/${cid}`, 'fetchColumn', commit)
         },
-        fetchPost({ commit }, cid) {
+        fetchPosts({ commit }, cid) {
             return getAndCommit(`/columns/${cid}/posts`, 'fetchPosts', commit)
         },
         fetchCurrentUser({ commit }) {
@@ -117,6 +119,9 @@ const store = createStore<GlobalDataProps>({
         },
         login({ commit }, payload) {
             return postAndCommit('/user/login', 'login', commit, payload)
+        },
+        createPost({ commit }, payload) {
+            return postAndCommit('/posts', 'createPost', commit, payload)
         },
         // 组合Action,让Login组件触发这个组合Action，完成登录获取token并且获取当前用户
         loginAndFetch({ dispatch }, loginData) {
