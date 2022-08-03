@@ -3,7 +3,7 @@
         <div class="d-flex align-items-center">
             <img :src="fitUrl" :alt="user.nickName" class="rounded-circle img-thumbnail">
             <div class="detail ml-2">
-                <h6 class="d-block mb-0">{{ user.nickName }}</h6>
+                <h6 class="d-block mb-0">&nbsp;{{ user.nickName }}</h6>
                 <span class="text-truncate text-muted d-block">{{ user.description }}</span>
             </div>
         </div>

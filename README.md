@@ -269,3 +269,48 @@ beforeUpload：完成上传前的校验
 4. 分析返回数据结构和需求
 
 
+#### 关于helper的一些补充⭐⭐⭐
+1. helper中的方法 generateFitUrl 就是添加对应的后缀的。
+这个问题关键是要看 oss 的处理文档：
+https://help.aliyun.com/document_detail/44688.html#title-y1e-xd2-5oo
+
+目标就是，在后面添加后缀
+
+将 https://image-demo.oss-cn-hangzhou.aliyuncs.com/example.jpg
+ 
+变成 
+ 
+http://image-demo.oss-cn-hangzhou.aliyuncs.com/example.jpg?👉x-oss-process=image/resize,m_fixed,h_100,w_100
+
+这里有两个要注意的点 
+
+m_fixed 是处理的方式，等于 format 数组中的内容，可以多个，要拼接成这样的字符串
+resize,m_fixed,m_pad  默认只有一个 m_pad
+后面那个 h w 好理解就是长宽了
+
+所以对format数组用reduce方法就是为了把format数组中的东西拼接成字符串
+这里的帮助函数是可以根据 上面oss处理文档中处理图片 的格式生成对应的 url，数组中是添加多项可以返回支持多种操作的字符串，这里只有一项，只是返回 m_pad, 注意后面的这个逗号。
+
+2. 懂了这个方法，addAvatar 就好理解了啊，就是添加 column的 avatar 属性，只不过这个有默认值，假如有值，就给他处理一下，多添加一个 fitUrl，没有就用本地的默认图片。
+
+3. 关于一些组件中这样的写法 <img :src="column.avatar && column.avatar.fitUrl">
+这种写法是这样写为了 ts 类型适配的，因为 avatar 可能是 undefined，所以要先判断 avatar 有值，再取上面的 fitUrl 属性，要不有可能会在 undefined 上直接取值，造成 js 错误。
+
+
+#### 10-1 添加编辑和删除区域
+说到编辑和删除，又引出了一个权限问题，一个登录的用户只能更新或者创建自己的文章。
+别人的文章他是没有权限做这个事情的。所以对于更新和删除，在任何系统中都要注意权限这个要素
+
+设计：
+当一个登录用户有权限的时候，我希望在文章底部会出现两个按钮 即 编辑和删除可以用他们来进行对应的操作
+
+问：什么时候有权限？
+在通过单篇文章的id去获取详细的单篇数据的时候，响应的数据中有一个author字段(用来表示这是谁创建的文章)
+author里面有_id、email、nickName、description、avatar
+其中这个_id 指代了一个独一无二的作者
+而登录用户中也有一个id，用来指代独一无二的登录用户。
+只要比较这两个字段就能得出结果。
+
+然后编辑功能，共用CreatePost这个组件就好了
+但要做一些改动
+比如 创建的时候是 create   带一个参数就变成了编辑 create?id=***

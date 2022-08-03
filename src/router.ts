@@ -54,11 +54,11 @@ const router = createRouter({
         }
     ]
 })
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => { // 全局路由守卫，初始化的时候 和 每次路由切换之前被调用
     const { user, token } = store.state
     const { requiredLogin, redirectAlreadyLogin } = to.meta
     if (!user.isLogin) {
-        // 没有登录的
+        //页面刷新会导致存在store的isLogin初始化为false，如果本地有token说明已经登录了
         if (token) {
             axios.defaults.headers.common.Authorization = `Bearer ${token}`
             store.dispatch('fetchCurrentUser').then(() => {
@@ -75,6 +75,7 @@ router.beforeEach((to, from, next) => {
             })
         } else {
             if (requiredLogin) {
+                // 因为这个requiredLogin和redirectAlreadyLogin都是从to中解构出来的，所以意思就是当你跳转到的目标路由的路由元信息规定你要登录才能访问，那就给你跳转到login去，如果你已经登录，去访问元信息中是redirectAlreadyLogin的路由，那么就给你重定向到首页
                 next('login')
             } else {
                 next()
@@ -83,6 +84,7 @@ router.beforeEach((to, from, next) => {
     } else {
         // 已经登录的
         if (redirectAlreadyLogin) {
+            //此时再从地址栏访问meta中带有redirectAlreadyLogin属性的路由，会被重定向到首页
             next('/')
         } else {
             next()

@@ -12,6 +12,12 @@
                 <span class="text-muted col text-right font-italic">发表于：{{ currentPost.createdAt }}</span>
             </div>
             <div v-html="currentHTML"></div>
+            <div v-if="showEditArea" class="btn-group mt-5">
+                <router-link :to="{ name: 'create', query: { id: currentPost._id } }" type="button"
+                    class="btn btn-success">编辑
+                </router-link>
+                <button type="button" class="btn btn-danger">删除</button>
+            </div>
         </article>
     </div>
 </template>
@@ -22,7 +28,7 @@ import { defineComponent, onMounted, computed } from 'vue'
 import MarkdownIt from 'markdown-it'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import { GlobalDataProps, PostProps, ImageProps } from '../store'
+import { GlobalDataProps, PostProps, ImageProps, UserProps } from '../store'
 import UserProfile from '../components/UserProfile.vue'
 
 export default defineComponent({
@@ -33,6 +39,7 @@ export default defineComponent({
     setup() {
         const store = useStore<GlobalDataProps>()
         const route = useRoute()
+        // 当前这篇文章的id
         const currentId = route.params.id
         const md = new MarkdownIt()
         onMounted(() => {
@@ -43,6 +50,17 @@ export default defineComponent({
             if (currentPost.value && currentPost.value.content) {
                 //调用markdown-it上面的方法，把用户输入的markdown格式转换成HTML格式
                 return md.render(currentPost.value.content)
+            }
+        })
+        const showEditArea = computed(() => {
+            const { isLogin, _id } = store.state.user
+            //currentPost是一个ComputedRefImpl对象，需要.value才能拿到值，类似ref
+            if (currentPost.value && currentPost.value.author && isLogin) {
+                //先判断currentPost.value是否存在，再判断作者存不存在，最后判断是否登录
+                const postAuthor = currentPost.value.author as UserProps
+                return postAuthor._id === _id//判断这篇文章的作者id是否等于登录的人的id
+            } else {
+                return false
             }
         })
         const currentImageUrl = computed(() => {
@@ -56,7 +74,8 @@ export default defineComponent({
         return {
             currentPost,
             currentImageUrl,
-            currentHTML
+            currentHTML,
+            showEditArea
         }
     }
 })

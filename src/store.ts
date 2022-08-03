@@ -36,7 +36,7 @@ export interface PostProps {
     image?: ImageProps | string;
     createdAt?: string;
     column: string;
-    author?: string;
+    author?: string | UserProps;
 }
 export interface GlobalErrorProps {
     status: boolean;
@@ -141,9 +141,12 @@ const store = createStore<GlobalDataProps>({
     getters: {
         getColumnById: (state) => (id: string) => {
             return state.columns.find(c => c._id === id)
+            // find方法对数组中的每个元素执行callback函数,并返回true的第一个元素值。
+            // find不会改变原数组
         },
         getPostsByCid: (state) => (cid: string) => {
             return state.posts.filter(post => post.column === cid)
+            //filter() 方法创建一个新数组, 其包含通过所提供函数实现的测试的所有元素。
         },
         getCurrentPost: (state) => (id: string) => {
             return state.posts.find(post => post._id === id)

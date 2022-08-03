@@ -31,8 +31,10 @@ export default defineComponent({
         }
     },
     setup(props) {
+        // 将传过来的list数据中的每一项url修改后缀
         const posts = computed(() => {
             return props.list.map(post => {
+                // map() 方法返回一个新数组,数组中的元素为原始数组元素调用函数处理后的值。
                 generateFitUrl(post.image as ImageProps, 200, 110, ['m_fill'])
                 return post
             })
