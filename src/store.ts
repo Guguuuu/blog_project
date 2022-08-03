@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { createStore, Commit } from 'vuex'
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 
 export interface ResponseType<P = {}> {
     code: number;
@@ -60,6 +60,11 @@ const postAndCommit = async (url: string, mutationName: string, commit: Commit, 
     commit(mutationName, data)
     return data
 }
+const asyncAndCommit = async (url: string, mutationName: string, commit: Commit, config: AxiosRequestConfig = { method: 'get' }) => {
+    const { data } = await axios(url, config)
+    commit(mutationName, data)
+    return data
+}
 const store = createStore<GlobalDataProps>({
     state: {
         error: { status: false },
@@ -87,6 +92,15 @@ const store = createStore<GlobalDataProps>({
         },
         fetchPost(state, rawData) {
             state.posts = [rawData.data]
+        },
+        updatePost(state, { data }) {
+            state.posts = state.posts.map(post => {
+                if (post._id === data._id) {
+                    return data
+                } else {
+                    return post
+                }
+            })
         },
         setLoading(state, status) {
             state.loading = status
@@ -121,6 +135,12 @@ const store = createStore<GlobalDataProps>({
         },
         fetchPost({ commit }, id) {
             return getAndCommit(`/posts/${id}`, 'fetchPost', commit)
+        },
+        updatePost({ commit }, { id, payload }) {
+            return asyncAndCommit(`/post/${id}`, 'updatePost', commit, {
+                method: 'patch',
+                data: payload
+            })
         },
         fetchCurrentUser({ commit }) {
             return getAndCommit('/user/current', 'fetchCurrentUser', commit)
