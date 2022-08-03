@@ -5,7 +5,7 @@
             <slot v-if="fileStatus === 'loading'" name="loading">
                 <button class="btn btn-primary" disabled>正在上传...</button>
             </slot>
-            <slot v-else-if="fileStatus === 'success'" name="uploaded" :uploadedData="uoloadedData">
+            <slot v-else-if="fileStatus === 'success'" name="uploaded" :uploadedData="uploadedData">
                 <button class="btn btn-primary">上传成功</button>
             </slot>
             <slot v-else name="default">
@@ -19,7 +19,7 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType, ref, watch } from "vue";
 import axios from 'axios'
 //我们需要根据上传的不同状态展现不同的元素，需要一个字段来指示状态
 type UploadStatus = 'ready' | 'loading' | 'success' | 'error'
@@ -33,14 +33,21 @@ export default defineComponent({
         },
         beforeUpload: {
             type: Function as PropType<CheckFunction>
+        },
+        uploaded: {
+            type: Object
         }
     },
     inheritAttrs: false,
     emits: ['file-uploaded', 'file-uploaded-error'],
     setup(props, context) {
         const fileInput = ref<null | HTMLInputElement>(null)
-        const fileStatus = ref<UploadStatus>('ready')
-        const uoloadedData = ref()
+        const fileStatus = ref<UploadStatus>(props.uploaded ? 'success' : 'ready')
+        const uploadedData = ref(props.uploaded)
+        watch(() => props.uploaded, (newValue) => {
+            fileStatus.value = 'success'
+            uploadedData.value = newValue
+        })
         const triggerUpload = () => {
             if (fileInput.value) {
                 fileInput.value.click()
@@ -70,7 +77,7 @@ export default defineComponent({
                 }).then(resp => {
                     fileStatus.value = 'success'
                     // console.log(resp.data); 根据响应数据的结构，我在store定义了ResponseType类型，以便让'file-uploaded'所对应的回调的参数设置成ResponseType类型获得更好的TS支持
-                    uoloadedData.value = resp.data
+                    uploadedData.value = resp.data
                     context.emit('file-uploaded', resp.data)
                 }).catch((error) => {
                     fileStatus.value = 'error'
@@ -86,7 +93,7 @@ export default defineComponent({
         return {
             fileInput,
             fileStatus,
-            uoloadedData,
+            uploadedData,
             triggerUpload,
             handleFileChange
         }

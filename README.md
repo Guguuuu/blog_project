@@ -314,3 +314,5 @@ author里面有_id、email、nickName、description、avatar
 然后编辑功能，共用CreatePost这个组件就好了
 但要做一些改动
 比如 创建的时候是 create   带一个参数就变成了编辑 create?id=***
+
+#### 10-2修改文章编码 第一部分 - 改进Upliader组件

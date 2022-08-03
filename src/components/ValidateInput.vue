@@ -1,9 +1,9 @@
 <template>
     <div class="validate-input-container pb-3">
         <input v-if="tag !== 'textarea'" class="form-control" :class="{ 'is-invalid': inputRef.error }"
-            :value="inputRef.val" @blur="validateInput" @input="updateValue" v-bind="$attrs">
-        <textarea v-else class="form-control" :class="{ 'is-invalid': inputRef.error }" :value="inputRef.val"
-            @blur="validateInput" @input="updateValue" v-bind="$attrs">
+            @blur="validateInput" v-model="inputRef.val" v-bind="$attrs">
+        <textarea v-else class="form-control" :class="{ 'is-invalid': inputRef.error }" @blur="validateInput"
+            v-model="inputRef.val" v-bind="$attrs">
     </textarea>
         <span v-if="inputRef.error" class="invalid-feedback">{{ inputRef.message }}</span>
     </div>
@@ -11,7 +11,7 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { defineComponent, reactive, PropType, onMounted } from "vue";
+import { defineComponent, reactive, PropType, onMounted, watch, computed } from "vue";
 import { emitter } from './ValidateForm.vue'
 const emailReg = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 interface RuleProp {
@@ -35,17 +35,15 @@ export default defineComponent({
     inheritAttrs: false, //我不希望组件的根元素继承attribute
     setup(props, context) {
         const inputRef = reactive({
-            val: props.modelValue || '',
+            val: computed({
+                get: () => props.modelValue || '',
+                set: val => {
+                    context.emit('update:modelValue', val)
+                }
+            }),
             error: false,
             message: ''
         })
-        // 自定义组件v-model的改造
-        // 2. 更新值的时候，需要触发一个事件，事件的名称是'update:modelValue',这样就可以实现v-model的功能了
-        const updateValue = (e: Event) => {
-            const targetValue = (e.target as HTMLInputElement).value
-            inputRef.val = targetValue
-            context.emit('update:modelValue', targetValue)
-        }
         const validateInput = () => {
             if (props.rules) {
                 const allPassed = props.rules.every(rule => {
@@ -77,7 +75,6 @@ export default defineComponent({
         return {
             inputRef,
             validateInput,
-            updateValue
         }
     }
 })
