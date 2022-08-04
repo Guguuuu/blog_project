@@ -50,16 +50,6 @@ export interface GlobalDataProps {
     posts: PostProps[];
     user: UserProps;
 }
-const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
-    const { data } = await axios.get(url)
-    commit(mutationName, data)
-    return data
-}
-const postAndCommit = async (url: string, mutationName: string, commit: Commit, payload: any) => {
-    const { data } = await axios.post(url, payload)
-    commit(mutationName, data)
-    return data
-}
 const asyncAndCommit = async (url: string, mutationName: string, commit: Commit, config: AxiosRequestConfig = { method: 'get' }) => {
     const { data } = await axios(url, config)
     commit(mutationName, data)
@@ -75,9 +65,6 @@ const store = createStore<GlobalDataProps>({
         user: { isLogin: false }
     },
     mutations: {
-        // login(state) {
-        //     state.user = { ...state.user, isLogin: true, name: 'viking' }
-        // },
         createPost(state, newPost) {
             state.posts.push(newPost)
         },
@@ -92,6 +79,9 @@ const store = createStore<GlobalDataProps>({
         },
         fetchPost(state, rawData) {
             state.posts = [rawData.data]
+        },
+        deletePost(state, { data }) {
+            state.posts = state.posts.filter(post => post._id !== data._id)
         },
         updatePost(state, { data }) {
             state.posts = state.posts.map(post => {
@@ -119,39 +109,42 @@ const store = createStore<GlobalDataProps>({
         },
         logout(state) {
             state.token = ''
+            state.user = { isLogin: false }
             localStorage.remove('token')
             delete axios.defaults.headers.common.Authorization
         }
     },
     actions: {
         fetchColumns({ commit }) {
-            return getAndCommit('/columns', 'fetchColumns', commit)
+            return asyncAndCommit('/columns', 'fetchColumns', commit)
         },
         fetchColumn({ commit }, cid) {
-            return getAndCommit(`/columns/${cid}`, 'fetchColumn', commit)
+            return asyncAndCommit(`/columns/${cid}`, 'fetchColumn', commit)
         },
         fetchPosts({ commit }, cid) {
-            return getAndCommit(`/columns/${cid}/posts`, 'fetchPosts', commit)
+            return asyncAndCommit(`/columns/${cid}/posts`, 'fetchPosts', commit)
         },
         fetchPost({ commit }, id) {
-            return getAndCommit(`/posts/${id}`, 'fetchPost', commit)
+            return asyncAndCommit(`/posts/${id}`, 'fetchPost', commit)
         },
         updatePost({ commit }, { id, payload }) {
-            return asyncAndCommit(`/post/${id}`, 'updatePost', commit, {
+            return asyncAndCommit(`/posts/${id}`, 'updatePost', commit, {
                 method: 'patch',
                 data: payload
             })
         },
         fetchCurrentUser({ commit }) {
-            return getAndCommit('/user/current', 'fetchCurrentUser', commit)
+            return asyncAndCommit('/user/current', 'fetchCurrentUser', commit)
         },
         login({ commit }, payload) {
-            return postAndCommit('/user/login', 'login', commit, payload)
+            return asyncAndCommit('/user/login', 'login', commit, { method: 'post', data: payload })
         },
         createPost({ commit }, payload) {
-            return postAndCommit('/posts', 'createPost', commit, payload)
+            return asyncAndCommit('/posts', 'createPost', commit, { method: 'post', data: payload })
         },
-        // 组合Action,让Login组件触发这个组合Action，完成登录获取token并且获取当前用户
+        deletePost({ commit }, id) {
+            return asyncAndCommit(`/posts/${id}`, 'deletePost', commit, { method: 'delete' })
+        },
         loginAndFetch({ dispatch }, loginData) {
             return dispatch('login', loginData).then(() => {
                 return dispatch('fetchCurrentUser')

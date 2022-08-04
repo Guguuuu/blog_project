@@ -43,7 +43,7 @@ import axios from 'axios'
 import { GlobalDataProps, PostProps, ResponseType, ImageProps } from '../store'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
-import Uploader from '@/components/Uploader.vue'
+import Uploader from '../components/Uploader.vue'
 import createMessage from '../components/createMessage'
 import { beforeUploadCheck } from '../helper'
 
@@ -71,7 +71,7 @@ export default defineComponent({
             { type: 'required', message: '文章详情不能为空' }
         ]
         onMounted(() => {
-            if (isEditMode) {
+            if (isEditMode) {//即，我是否是点击编辑按钮进来的
                 store.dispatch('fetchPost', route.query.id).then((rawData: ResponseType<PostProps>) => {
                     const currentPost = rawData.data
                     if (currentPost.image) {
