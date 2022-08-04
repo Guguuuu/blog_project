@@ -316,3 +316,12 @@ author里面有_id、email、nickName、description、avatar
 比如 创建的时候是 create   带一个参数就变成了编辑 create?id=***
 
 #### 10-2修改文章编码 第一部分 - 改进Upliader组件
+
+
+#### 10-7 集成Easymde编辑器
+目前流行的markdown编辑器
+simpleMDE - https://simplemde.com/ 不维护了
+EasyMDE - https://github.com/lonaru/easy-markdown-editor
+cherry-markdown - https://github.com/Tencent/cherry-markdown （腾讯的开源产品）
+
+这里选EasyMDE ： npm install easymde

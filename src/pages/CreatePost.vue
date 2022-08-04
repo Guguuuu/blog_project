@@ -24,6 +24,7 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">文章详情：</label>
+                <editor v-model="contentVal" :options="editorOptions"></editor>
                 <validate-input rows="10" type="text" tag="textarea" placeholder="请输入文章详情" :rules="contentRules"
                     v-model="contentVal" />
             </div>
@@ -39,11 +40,12 @@
 import { defineComponent, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
-import axios from 'axios'
+import { Options } from 'easymde'
 import { GlobalDataProps, PostProps, ResponseType, ImageProps } from '../store'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
 import Uploader from '../components/Uploader.vue'
+import Editor from '../components/Editor.vue'
 import createMessage from '../components/createMessage'
 import { beforeUploadCheck } from '../helper'
 
@@ -52,7 +54,8 @@ export default defineComponent({
     components: {
         ValidateInput,
         ValidateForm,
-        Uploader
+        Uploader,
+        Editor
     },
     setup() {
         const uploadedData = ref()
@@ -63,6 +66,9 @@ export default defineComponent({
         const isEditMode = !!route.query.id//利用!!转换成布尔类型，如果route.query.id存在为true
         const store = useStore<GlobalDataProps>()
         let imageId = ''
+        const editorOptions: Options = {
+            spellChecker: false // 拼写检查设置成false
+        }
         const titleRules: RulesProp = [
             { type: 'required', message: '文章标题不能为空' }
         ]
@@ -71,6 +77,7 @@ export default defineComponent({
             { type: 'required', message: '文章详情不能为空' }
         ]
         onMounted(() => {
+
             if (isEditMode) {//即，我是否是点击编辑按钮进来的
                 store.dispatch('fetchPost', route.query.id).then((rawData: ResponseType<PostProps>) => {
                     const currentPost = rawData.data
@@ -132,6 +139,7 @@ export default defineComponent({
             contentRules,
             uploadedData,
             isEditMode,
+            editorOptions,
             onFormSubmit,
             uploadCheck,
             handleFileUploaded
