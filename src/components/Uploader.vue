@@ -45,8 +45,12 @@ export default defineComponent({
         const fileStatus = ref<UploadStatus>(props.uploaded ? 'success' : 'ready')
         const uploadedData = ref(props.uploaded)
         watch(() => props.uploaded, (newValue) => {
-            fileStatus.value = 'success'
-            uploadedData.value = newValue
+            if (newValue) {
+                fileStatus.value = 'success'
+                uploadedData.value = newValue
+            } else {
+                fileStatus.value = 'ready'
+            }
         })
         const triggerUpload = () => {
             if (fileInput.value) {

@@ -7,6 +7,7 @@ import Signup from './pages/Signup.vue'
 import ColumnDetail from './pages/ColumnDetail.vue'
 import CreatePost from './pages/CreatePost.vue'
 import PostDetail from './pages/PostDetail.vue'
+import EditProfile from './pages/EditProfile.vue'
 import store from './store'
 // 一般采用history模式，不采用hash模式
 const routerHistory = createWebHistory()
@@ -51,6 +52,12 @@ const router = createRouter({
             path: '/posts/:id',
             name: 'post',
             component: PostDetail
+        },
+        {
+            path: '/edit',
+            name: 'edit',
+            component: EditProfile,
+            meta: { requiredLogin: true }
         }
     ]
 })

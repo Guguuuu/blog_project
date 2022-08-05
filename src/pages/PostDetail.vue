@@ -1,10 +1,10 @@
 <template>
-    <div class="post-detail-page">
+    <div class="post-detail-page w-690">
         <modal title="删除文章" :visible="modalIsVisible" @modal-on-close="modalIsVisible = false"
             @modal-on-confirm="hideAndDelete">
             <p>确定要删除这篇文章吗 ?</p>
         </modal>
-        <article class="w-75 mx-auto mb-5 pb-3" v-if="currentPost">
+        <article class="mb-5 pb-3" v-if="currentPost">
             <img :src="currentImageUrl" alt="currentPost.title" class="rounded-lg img-fluid my-4"
                 v-if="currentImageUrl">
             <h2 class="mb-4">{{ currentPost.title }}</h2>
@@ -29,7 +29,7 @@
 <script lang="ts">
 /* eslint-disable */
 import { defineComponent, onMounted, computed, ref } from 'vue'
-import MarkdownIt from 'markdown-it'
+import { marked } from 'marked'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { GlobalDataProps, PostProps, ImageProps, UserProps, ResponseType } from '../store'
@@ -50,7 +50,6 @@ export default defineComponent({
         const modalIsVisible = ref(false)
         // 当前这篇文章的id
         const currentId = route.params.id
-        const md = new MarkdownIt()
         onMounted(() => {
             store.dispatch('fetchPost', currentId)
         })
@@ -58,7 +57,7 @@ export default defineComponent({
         const currentHTML = computed(() => {
             if (currentPost.value && currentPost.value.content) {
                 //调用markdown-it上面的方法，把用户输入的markdown格式转换成HTML格式
-                return md.render(currentPost.value.content)
+                return marked.parse(currentPost.value.content)
             }
         })
         const showEditArea = computed(() => {

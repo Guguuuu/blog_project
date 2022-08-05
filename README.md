@@ -1,4 +1,4 @@
-# zhihu_project
+# 使用 Typescript + Vue3.0 从零到一测试到上线 高仿知乎专栏
 
 ## Project setup
 ```

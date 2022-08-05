@@ -1,7 +1,7 @@
 <template>
-    <div class="create-post-page">
+    <div class="create-post-page container">
         <h4>{{ isEditMode ? '编辑文章' : '新建文章' }}</h4>
-        <uploader action="/upload" :beforeUpload="uploadCheck" @file-uploaded="handleFileUploaded"
+        <uploader action="/upload" :beforeUpload="commonUploadCheck" @file-uploaded="handleFileUploaded"
             :uploaded="uploadedData"
             class="d-flex align-items-center justify-content-center bg-light text-secondary w-100 my-4">
             <h2>点击上传头图</h2>
@@ -24,9 +24,9 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">文章详情：</label>
-                <editor v-model="contentVal" :options="editorOptions"></editor>
-                <validate-input rows="10" type="text" tag="textarea" placeholder="请输入文章详情" :rules="contentRules"
-                    v-model="contentVal" />
+                <editor v-model="contentVal" :options="editorOptions" @blur="checkEditor" ref="editorRef"
+                    :class="{ 'is-invalid': !editorStatus.isValid }"></editor>
+                <span v-if="!editorStatus.isValid" class="invalid-feedback mt-1">{{ editorStatus.message }}</span>
             </div>
             <template #submit>
                 <button class="btn btn-primary btn-large">{{ isEditMode ? '更新文章' : '发表文章' }}</button>
@@ -37,18 +37,21 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
-import { Options } from 'easymde'
+import EasyMDE, { Options } from 'easymde'
 import { GlobalDataProps, PostProps, ResponseType, ImageProps } from '../store'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
 import Uploader from '../components/Uploader.vue'
 import Editor from '../components/Editor.vue'
 import createMessage from '../components/createMessage'
-import { beforeUploadCheck } from '../helper'
-
+import { commonUploadCheck } from '../helper'
+interface EditorInstance {
+    clear: () => void;
+    getMDEInstance: () => EasyMDE | null
+}
 export default defineComponent({
     name: 'Login',
     components: {
@@ -60,11 +63,16 @@ export default defineComponent({
     setup() {
         const uploadedData = ref()
         const titleVal = ref('')
+        const editorStatus = reactive({
+            isValid: true,
+            message: ''
+        })
         const router = useRouter()
         const route = useRoute()
         // 利用这个变量来判断是否是编辑模式
         const isEditMode = !!route.query.id//利用!!转换成布尔类型，如果route.query.id存在为true
         const store = useStore<GlobalDataProps>()
+        const editorRef = ref<null | EditorInstance>()
         let imageId = ''
         const editorOptions: Options = {
             spellChecker: false // 拼写检查设置成false
@@ -73,9 +81,18 @@ export default defineComponent({
             { type: 'required', message: '文章标题不能为空' }
         ]
         const contentVal = ref('')
-        const contentRules: RulesProp = [
-            { type: 'required', message: '文章详情不能为空' }
-        ]
+        // const contentRules: RulesProp = [
+        //     { type: 'required', message: '文章详情不能为空' }
+        // ]
+        const checkEditor = () => {
+            if (contentVal.value.trim() === '') {
+                editorStatus.isValid = false
+                editorStatus.message = '文章详情不能为空'
+            } else {
+                editorStatus.isValid = true
+                editorStatus.message = ''
+            }
+        }
         onMounted(() => {
 
             if (isEditMode) {//即，我是否是点击编辑按钮进来的
@@ -95,7 +112,8 @@ export default defineComponent({
             }
         }
         const onFormSubmit = (result: boolean) => {
-            if (result) {
+            checkEditor()
+            if (result && editorStatus.isValid) {
                 const { column, _id } = store.state.user
                 if (column) {
                     const newPost: PostProps = {
@@ -113,36 +131,29 @@ export default defineComponent({
                         payload: newPost
                     } : newPost
                     store.dispatch(actionName, sendData).then(() => {
-                        createMessage('发表成功，准备跳转到文章', 'success', 2000)
+                        createMessage('发表成功，准备跳转到文章', 'success', 1000)
                         setTimeout(() => {
                             router.push({ name: 'column', params: { id: column } })
-                        }, 2000)
+                        }, 1000)
                     })
                 }
             }
         }
-        const uploadCheck = (file: File) => {
-            const result = beforeUploadCheck(file, { format: ['image/jpeg', 'image/png'], size: 1 })
-            const { passed, error } = result
-            if (error === 'format') {
-                createMessage('上传图片只能是 JPG/PNG 格式!', 'error')
-            }
-            if (error === 'size') {
-                createMessage('上传图片大小不能超过 1Mb', 'error')
-            }
-            return passed
-        }
+
         return {
             titleRules,
             titleVal,
             contentVal,
-            contentRules,
+            // contentRules,
             uploadedData,
             isEditMode,
             editorOptions,
+            editorRef,
+            editorStatus,
             onFormSubmit,
-            uploadCheck,
-            handleFileUploaded
+            commonUploadCheck,
+            handleFileUploaded,
+            checkEditor
         }
     }
 })

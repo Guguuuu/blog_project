@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { ColumnProps, ImageProps, UserProps } from './store'
+import createMessage from './components/createMessage'
 
 export function generateFitUrl(data: ImageProps, width: number, height: number, format = ['m_pad']) {
     if (data && data.url) {
@@ -11,6 +12,18 @@ export function generateFitUrl(data: ImageProps, width: number, height: number, 
         }, '')
         data.fitUrl = data.url + `?x-oss-process=image/resize,${formatStr}h_${height},w_${width}`
     }
+}
+
+export const commonUploadCheck = (file: File) => {
+    const result = beforeUploadCheck(file, { format: ['image/jpeg', 'image/png'], size: 1 })
+    const { passed, error } = result
+    if (error === 'format') {
+        createMessage('上传图片只能是 JPG/PNG 格式!', 'error')
+    }
+    if (error === 'size') {
+        createMessage('上传图片大小不能超过 1Mb', 'error')
+    }
+    return passed
 }
 
 export function addColumnAvatar(data: ColumnProps | UserProps, width: number, height: number) {
