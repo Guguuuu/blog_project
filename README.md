@@ -1,4 +1,4 @@
-# 使用 Typescript + Vue3.0 从零到一测试到上线 高仿知乎专栏
+# 使用 Typescript + Vue3.0 制作的博客专栏项目
 
 ## Project setup
 ```
