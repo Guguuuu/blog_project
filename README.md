@@ -1,4 +1,4 @@
-# 使用 Typescript + Vue3.0 从零到一测试到上线 高仿知乎专栏
+# 使用 Typescript + Vue3.0 制作的博客专栏项目
 
 ## Project setup
 ```
@@ -22,9 +22,8 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+<<<<<<< HEAD
 
-## 关于优化
-一些以及发送过的异步请求，没必要每次跳转路由的时候都再发送一次。不需要再次发送请求的数据，我们应该缓存下来。
 
 ### 笔记
 
@@ -37,7 +36,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 1. 基于cookie和session的方案
 首先我们post 用户名密码，给服务器验证，如果验证正确，就会创建一个对应的session数据并且保存
 这个session数据可以保存在内存中或者数据库中
-保存完毕之后会发送返回一个HTTP状态码 200 ok 的response，这个response中一般会有一个header叫Set-Cookie：然后带上session数据的sessionid
+保存完毕之后会发送返回一个HTTP状态码 200 ok 的response，这个response中一般会有一个header叫Set-Cookie：然后带上sessionid
 浏览器拿到这个response以后呢，因为有Set-Cookie这个header，就会把这个cookie保存到这个浏览器中
 下次我们访问需要权限的接口以后，比如请求Get/api/user 就会自动把这个cookie带上 Cookie:sessionid
 然后就到服务器端，服务器端会使用Cookie中的信息sessionid查看服务器是否存在该session数据
@@ -327,9 +326,3 @@ EasyMDE - https://github.com/lonaru/easy-markdown-editor
 cherry-markdown - https://github.com/Tencent/cherry-markdown （腾讯的开源产品）
 
 这里选EasyMDE ： npm install easymde
-
-#### 生产环境和开发环境
-线上运行我们应用的环境称为生产环境 production environment，一般都是有一个固定的URL供用户访问
-我们本地运行的环境，也就是npm run serve然后在localhost8080访问的环境称为开发环境 development environment
-
-当然还有一个测试环境，供测试工程师对开发完的功能进行测试。
