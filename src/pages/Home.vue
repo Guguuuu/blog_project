@@ -23,7 +23,6 @@ import { useStore } from 'vuex'
 import { GlobalDataProps } from '../store'
 import ColumnList from '../components/ColumnList.vue'
 import Uploader from '../components/Uploader.vue';
-import createMessage from '../components/createMessage';
 
 export default defineComponent({
     name: 'Home',
@@ -36,18 +35,9 @@ export default defineComponent({
         onMounted(() => {
             store.dispatch('fetchColumns')
         })
-        const list = computed(() => store.state.columns)
-        // 测试传给Uploader组件的beforeUpload是否有用
-        const beforeUpload = (file: File) => {
-            const isJPG = file.type === 'image/jpeg'
-            if (!isJPG) {
-                createMessage('上传图片只能是JPG格式！', 'error', 1000)
-            }
-            return isJPG
-        }
+        const list = computed(() => store.state.columns) 
         return {
             list,
-            beforeUpload,
         }
     }
 })
