@@ -14,14 +14,14 @@ axios.interceptors.request.use(config => {
     store.commit('setError', { status: false, message: '' })
 
     // get请求，添加到URL中
-    config.params = { ...config.params, icode: '4360EE120909DC7F' }
+    config.params = { ...config.params, icode: '47427B000EAA2C72' }
     // 其他请求，添加到body中
     // 如果是上传文件，添加到FormData中
     if (config.data instanceof FormData) {
-        config.data.append('icode', '4360EE120909DC7F')
+        config.data.append('icode', '47427B000EAA2C72')
     } else {
         // 普通的body对象，添加到data中
-        config.data = { ...config.data, icode: '4360EE120909DC7F' }
+        config.data = { ...config.data, icode: '47427B000EAA2C72' }
     }
     return config
 })
